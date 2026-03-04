@@ -23,7 +23,7 @@ st.divider()
 st.header("About")
 st.markdown("""
 StayScore helps hotel revenue and operations teams anticipate which bookings are likely to be cancelled. 
-Built on a Decision Tree model trained on real hotel booking data, the app predicts cancellation risk 
+Built on a Logistic Regression model trained on real hotel booking data, the app predicts cancellation risk 
 for individual bookings or bulk samples — so you can prioritize overbooking controls, targeted offers, 
 or follow-up actions.
 """)
@@ -52,4 +52,4 @@ st.markdown("""
 - Dennis Schira  
 """)
 
-st.caption("Model: Decision Tree | Dataset: Hotel Bookings")
+st.caption("Model: Logistic Regression | Dataset: Hotel Bookings")

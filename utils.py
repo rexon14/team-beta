@@ -2,19 +2,20 @@
 Shared utilities for StayScore hotel cancellation predictor.
 """
 
+import pickle
 import pandas as pd
-import joblib
 import streamlit as st
 from pathlib import Path
 
 
 @st.cache_resource
 def load_model():
-    """Load the decision tree model from disk."""
-    model_path = Path(__file__).parent / "decision_tree_model.pkl"
+    """Load the Logistic Regression model from disk."""
+    model_path = Path(__file__).parent / "logreg_tuned.pkl"
     if not model_path.exists():
         return None
-    return joblib.load(model_path)
+    with open(model_path, "rb") as f:
+        return pickle.load(f)
 
 
 def row_to_form_data(row):
@@ -53,21 +54,7 @@ def row_to_form_data(row):
 
 
 def build_input_df(form_data):
-    """Build single-row DataFrame with feature engineering for model input."""
-    total_stay = form_data["stays_in_weekend_nights"] + form_data["stays_in_week_nights"]
-    total_guest = form_data["adults"] + form_data["children"] + form_data["babies"]
-    change_ratio = (
-        form_data["booking_changes"] / form_data["lead_time"]
-        if form_data["lead_time"] > 0
-        else 0
-    )
-    request_per_stay = (
-        form_data["total_of_special_requests"] / total_stay
-        if total_stay > 0
-        else 0
-    )
-    adr_per_person = form_data["adr"] / max(total_guest, 1)
-
+    """Build single-row DataFrame with raw columns for logreg_tuned model input."""
     row = {
         "hotel": form_data["hotel"],
         "lead_time": float(form_data["lead_time"]),
@@ -75,6 +62,11 @@ def build_input_df(form_data):
         "arrival_date_month": form_data["arrival_date_month"],
         "arrival_date_week_number": int(form_data["arrival_date_week_number"]),
         "arrival_date_day_of_month": int(form_data["arrival_date_day_of_month"]),
+        "stays_in_weekend_nights": int(form_data["stays_in_weekend_nights"]),
+        "stays_in_week_nights": int(form_data["stays_in_week_nights"]),
+        "adults": int(form_data["adults"]),
+        "children": int(form_data["children"]),
+        "babies": int(form_data["babies"]),
         "meal": form_data["meal"],
         "country": form_data["country"],
         "market_segment": form_data["market_segment"],
@@ -93,11 +85,6 @@ def build_input_df(form_data):
         "adr": float(form_data["adr"]),
         "required_car_parking_spaces": int(form_data["required_car_parking_spaces"]),
         "total_of_special_requests": int(form_data["total_of_special_requests"]),
-        "total_stay": total_stay,
-        "total_guest": total_guest,
-        "change_ratio": change_ratio,
-        "request_per_stay": request_per_stay,
-        "adr_per_person": adr_per_person,
     }
     return pd.DataFrame([row])
 
